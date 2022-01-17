@@ -155,4 +155,18 @@ class DataPipline():
         cryp_volat = pd.concat(cryp_volat, axis=1)
         cryp_volat.columns = cryp_volat.keys()
         cryp_volat.to_csv(self.workspace + 'Exp Data/v2/crypto_volatility.csv')
+        
+        conv_ex = []
+        for name in conven.keys():
+            conv_ex.append(conven[name][self._by])
+        conv_ex = pd.concat(conv_ex, axis=1)
+        conv_ex.columns = conven.keys()
+        conv_ex.to_csv(self.workspace + 'Exp Data/v2/conv_exchange.csv')
+
+        cryp_ex = []
+        for name in crypto.keys():
+            cryp_ex.append(crypto[name][self._by])
+        cryp_ex = pd.concat(cryp_ex, axis=1)
+        cryp_ex.columns = crypto.keys()
+        cryp_ex.to_csv(self.workspace + 'Exp Data/v2/crypto_exchange.csv')
         print('SUCCESS!')
