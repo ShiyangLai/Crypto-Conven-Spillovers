@@ -106,20 +106,6 @@ class DataPipline():
         conv_returns = pd.concat(conv_returns, axis=1)
         conv_returns.columns = conven.keys()
         conv_returns.to_csv(self.workspace + 'Exp Data/v2/conv_returns.csv')
-
-        conv_returns = []
-        for name in conven.keys():
-            conv_returns.append(self.calculate_returns(conven[name], _by=self._by, how='positive'))
-        conv_returns = pd.concat(conv_returns, axis=1)
-        conv_returns.columns = conven.keys()
-        conv_returns.to_csv(self.workspace + 'Exp Data/v2/conv_preturns.csv')
-
-        conv_returns = []
-        for name in conven.keys():
-            conv_returns.append(self.calculate_returns(conven[name], _by=self._by, how='negative'))
-        conv_returns = pd.concat(conv_returns, axis=1)
-        conv_returns.columns = conven.keys()
-        conv_returns.to_csv(self.workspace + 'Exp Data/v2/conv_nreturns.csv')
         
         cryp_returns = []
         for name in crypto.keys():
@@ -127,13 +113,33 @@ class DataPipline():
         cryp_returns = pd.concat(cryp_returns, axis=1)
         cryp_returns.columns = crypto.keys()
         cryp_returns.to_csv(self.workspace + 'Exp Data/v2/crypto_returns.csv')
+        
+        returns = pd.merge(cryp_returns, conv_returns, how='inner', left_index=True, right_index=True)
+        returns.to_csv(self.workspace + 'Exp Data/v2/returns.csv')
 
+        conv_returns = []
+        for name in conven.keys():
+            conv_returns.append(self.calculate_returns(conven[name], _by=self._by, how='positive'))
+        conv_returns = pd.concat(conv_returns, axis=1)
+        conv_returns.columns = conven.keys()
+        conv_returns.to_csv(self.workspace + 'Exp Data/v2/conv_preturns.csv')
+        
         cryp_returns = []
         for name in crypto.keys():
             cryp_returns.append(self.calculate_returns(crypto[name], _by=self._by, how='positive'))
         cryp_returns = pd.concat(cryp_returns, axis=1)
         cryp_returns.columns = crypto.keys()
         cryp_returns.to_csv(self.workspace + 'Exp Data/v2/crypto_preturns.csv')
+        
+        returns = pd.merge(cryp_returns, conv_returns, how='inner', left_index=True, right_index=True)
+        returns.to_csv(self.workspace + 'Exp Data/v2/preturns.csv')
+
+        conv_returns = []
+        for name in conven.keys():
+            conv_returns.append(self.calculate_returns(conven[name], _by=self._by, how='negative'))
+        conv_returns = pd.concat(conv_returns, axis=1)
+        conv_returns.columns = conven.keys()
+        conv_returns.to_csv(self.workspace + 'Exp Data/v2/conv_nreturns.csv')
 
         cryp_returns = []
         for name in crypto.keys():
@@ -141,6 +147,9 @@ class DataPipline():
         cryp_returns = pd.concat(cryp_returns, axis=1)
         cryp_returns.columns = crypto.keys()
         cryp_returns.to_csv(self.workspace + 'Exp Data/v2/crypto_nreturns.csv')
+        
+        returns = pd.merge(cryp_returns, conv_returns, how='inner', left_index=True, right_index=True)
+        returns.to_csv(self.workspace + 'Exp Data/v2/nreturns.csv')
         
         conv_volat = []
         for name in conven.keys():
@@ -156,6 +165,9 @@ class DataPipline():
         cryp_volat.columns = cryp_volat.keys()
         cryp_volat.to_csv(self.workspace + 'Exp Data/v2/crypto_volatility.csv')
         
+        volat = pd.merge(cryp_volat, conv_volat, how='inner', left_index=True, right_index=True)
+        volat.to_csv(self.workspace + 'Exp Data/v2/volatility.csv')
+        
         conv_ex = []
         for name in conven.keys():
             conv_ex.append(conven[name][self._by])
@@ -169,4 +181,9 @@ class DataPipline():
         cryp_ex = pd.concat(cryp_ex, axis=1)
         cryp_ex.columns = crypto.keys()
         cryp_ex.to_csv(self.workspace + 'Exp Data/v2/crypto_exchange.csv')
+        
+        ex = pd.merge(cryp_ex, conv_ex, how='inner', left_index=True, right_index=True)
+        ex.to_csv(self.workspace + 'Exp Data/v2/exchange.csv')
+
+        
         print('SUCCESS!')
