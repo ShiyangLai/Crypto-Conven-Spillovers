@@ -16,6 +16,7 @@ conven_returns <- read_csv("Exp Data/v2/conv_returns.csv",
 crypto_returns <- read_csv("Exp Data/v2/crypto_returns.csv", 
                            col_types = cols(...1 = col_date(format = "%Y-%m-%d")))
 
+
 ########################## returns ##############################
 
 # time
@@ -31,7 +32,7 @@ VARselect(conven_returns[,c(2:27)], lag.max=20, type='both')
 VARselect(filter(crypto_returns, ...1 >= ymd('2018-01-01'))[,c(2:12)], lag.max=20, type='both')
 
 # set lag order to 9 according to AIC and FPE
-model.basic <- constructModel(return.matrix, p=9, struct = "Basic",
+model.basic <- constructModel(return.matrix, p=3, struct = "Basic",
                               gran=c(26, 26), RVAR=FALSE, h=1,
                               cv="Rolling", MN=FALSE, verbose=FALSE,
                               IC=TRUE)
@@ -43,5 +44,5 @@ result
 
 ########################## positive returns ############################
 
-
+#
 
