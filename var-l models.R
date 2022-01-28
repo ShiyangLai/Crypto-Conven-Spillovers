@@ -19,11 +19,11 @@ crypto_returns <- read_csv("Exp Data/v2/crypto_returns.csv",
 
 ########################## returns ##############################
 
-# time
+# time 2015-2022
 time_stamp <- seq(as.Date("2009-01-02"), as.Date("2022-01-01"), by="day")
 
 # transform to matrix
-return.matrix <- data.matrix(returns[,c(2:38)])
+return.matrix <- data.matrix(returns[c(1:4748), c(2:38)])
 
 # for conventional currency, the best lag is 9
 VARselect(conven_returns[,c(2:27)], lag.max=20, type='both')
@@ -32,8 +32,8 @@ VARselect(conven_returns[,c(2:27)], lag.max=20, type='both')
 VARselect(filter(crypto_returns, ...1 >= ymd('2018-01-01'))[,c(2:12)], lag.max=20, type='both')
 
 # set lag order to 9 according to AIC and FPE
-model.basic <- constructModel(return.matrix, p=3, struct = "Basic",
-                              gran=c(26, 26), RVAR=FALSE, h=1,
+model.basic <- constructModel(return.matrix, p=5, struct = "Basic",
+                              gran=c(10, 50), RVAR=FALSE, h=1,
                               cv="Rolling", MN=FALSE, verbose=FALSE,
                               IC=TRUE)
 result <- cv.BigVAR(model.basic)
