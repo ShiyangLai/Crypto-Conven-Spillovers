@@ -2,7 +2,7 @@ library(parallel)
 
 # calculate connectedness with frequency
 bounds <- c(pi+0.00001, pi/2, pi/7, 0)
-dy12 <- spilloverBK12(result, n.ahead=100, no.corr=F, partition=bounds)
+dy12 <- spilloverBK12(model.var, n.ahead=100, no.corr=F, partition=bounds)
 dy12
 net(dy12)
 
@@ -17,10 +17,8 @@ tradTocrypto_rl <- vector(mode="numeric", length=0)
 # assign the mission to cores
 r <- mclapply(1:5, function(i) {
   for (i in c(1:6)) {
-    white_noise <- matrix(rnorm(4748*37), 4748, 37)
-    mod.noise <- constructModel(white_noise, p=5, struct="Basic", gran=c(10, 100), RVAR=FALSE,
-                           h=1, cv="Rolling", MN=FALSE, verbose=FALSE, IC=TRUE)
-    result<- cv.BigVAR(mod.noise)
+    white_noise <- matrix(rnorm(4748*37, 0, 10e-9), 4748, 37)
+    result<- VAR(white_noise, p=3)
     dy12 <- spilloverBK12(result, n.ahead = 100, no.corr = F, partition = bounds)
     s <- dy12$tables[[1]]
     cryptoTotrad_rs <- append(cryptoTotrad_rs, as.numeric(s[c(12:37), c(1:11)]))
@@ -65,24 +63,26 @@ cryptoTotrad_l <- append(cryptoTotrad_l, as.numeric(l[c(12:37), c(1:11)]))
 tradTocrypto_l <- append(tradTocrypto_l, as.numeric(l[c(1:11), c(12:37)]))
 
 
-colors <- c("Crypto->Currency" = "red", "White Noise" = "blue")
+colors <- c("Crypto->Currency" = "red", "Currency->Crypto" = "blue")
 a11 <- ggplot() + 
+  geom_density(data = as.data.frame(tradTocrypto_s), alpha=0.9,
+               aes(x=tradTocrypto_s, ..scaled.., fill="Currency->Crypto")) +
   geom_density(data = as.data.frame(cryptoTotrad_s), alpha=0.9,
                aes(x=cryptoTotrad_s, ..scaled.., fill="Crypto->Currency")) +
-  geom_density(data = as.data.frame(cryptoTotrad_rs), alpha=0.9,
-               aes(x=cryptoTotrad_rs, ..scaled.., fill="White Noise")) +
+  # geom_density(data = as.data.frame(cryptoTotrad_rs), alpha=0.9,
+               # aes(x=cryptoTotrad_rs, ..scaled.., fill="White Noise")) +
   labs(x="Connectedness", y="Probability", fill='') +
   scale_color_manual(values = colors) + theme_cowplot() +
   theme(legend.position = c(0.7, 0.8),
         plot.margin = margin(0.5,0.8,0.5,0.8, "cm"),
         text=element_text(family="Times New Roman"))
+a11
 
-colors <- c("Currency->Crypto" = "red", "White Noise" = "blue")
 a12 <- ggplot() +
   geom_density(data = as.data.frame(tradTocrypto_s), alpha=0.9,
                aes(x=tradTocrypto_s, ..scaled.., fill="Currency->Crypto")) +
-  geom_density(data = as.data.frame(tradTocrypto_rs), alpha=0.9,
-               aes(x=tradTocrypto_rs, ..scaled.., fill="White Noise")) +
+  # geom_density(data = as.data.frame(tradTocrypto_rs), alpha=0.9,
+               # aes(x=tradTocrypto_rs, ..scaled.., fill="White Noise")) +
   labs(x="Connectedness", y="Probability", fill='') +
   scale_color_manual(values = colors) + theme_cowplot() +
   theme(legend.position = c(0.7, 0.8),
