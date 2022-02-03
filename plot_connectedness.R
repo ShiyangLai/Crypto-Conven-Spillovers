@@ -1,5 +1,5 @@
 # define a function to perform the task
-plot_connectedness <- function(dataset) {
+plot_connectedness <- function(dataset, conven, crypto) {
   model.basic <- constructModel(dataset, p=3, struct = "Basic",
                                 gran=c(10, 25), RVAR=FALSE, h=1,
                                 cv="Rolling", MN=FALSE, verbose=FALSE,
@@ -24,23 +24,23 @@ plot_connectedness <- function(dataset) {
   dy12 <- spilloverBK12(result, n.ahead = 100, no.corr = F, partition = bounds)
   
   s <- dy12$tables[[1]]
-  crypTotrad_s <- append(crypTotrad_s, as.numeric(s[c(12:37), c(1:11)]))
-  tradTocryp_s <- append(tradTocryp_s, as.numeric(s[c(1:11), c(12:37)]))
-  crypTocryp_s <- append(crypTocryp_s, as.numeric(s[c(1:11), c(1:11)]))
-  tradTotrad_s <- append(tradTotrad_s, as.numeric(s[c(12:37), c(12:37)]))
+  crypTotrad_s <- append(crypTotrad_s, as.numeric(s[conven, crypto]))
+  tradTocryp_s <- append(tradTocryp_s, as.numeric(s[crypto, conven]))
+  crypTocryp_s <- append(crypTocryp_s, as.numeric(s[crypto, crypto]))
+  tradTotrad_s <- append(tradTotrad_s, as.numeric(s[conven, conven]))
   
   m <- dy12$tables[[2]]
-  crypTotrad_m <- append(crypTotrad_m, as.numeric(m[c(12:37), c(1:11)]))
-  tradTocryp_m <- append(tradTocryp_m, as.numeric(m[c(1:11), c(12:37)]))
-  crypTocryp_m <- append(crypTocryp_m, as.numeric(m[c(1:11), c(1:11)]))
-  tradTotrad_m <- append(tradTotrad_m, as.numeric(m[c(12:37), c(12:37)]))
+  crypTotrad_m <- append(crypTotrad_m, as.numeric(s[conven, crypto]))
+  tradTocryp_m <- append(tradTocryp_m, as.numeric(s[crypto, conven]))
+  crypTocryp_m <- append(crypTocryp_m, as.numeric(s[crypto, crypto]))
+  tradTotrad_m <- append(tradTotrad_m, as.numeric(s[conven, conven]))
   
   
   l <- dy12$tables[[3]]
-  crypTotrad_l <- append(crypTotrad_l, as.numeric(l[c(12:37), c(1:11)]))
-  tradTocryp_l <- append(tradTocryp_l, as.numeric(l[c(1:11), c(12:37)]))
-  crypTocryp_l <- append(crypTocryp_l, as.numeric(l[c(1:11), c(1:11)]))
-  tradTotrad_l <- append(tradTotrad_l, as.numeric(l[c(12:37), c(12:37)]))
+  crypTotrad_l <- append(crypTotrad_l, as.numeric(s[conven, crypto]))
+  tradTocryp_l <- append(tradTocryp_l, as.numeric(s[crypto, conven]))
+  crypTocryp_l <- append(crypTocryp_l, as.numeric(s[crypto, crypto]))
+  tradTotrad_l <- append(tradTotrad_l, as.numeric(s[conven, conven]))
   
   colors <- c("Crypto->Curren" = "#20639B",
               "Curren->Crypto" = "#3CAEA3",
@@ -65,11 +65,10 @@ plot_connectedness <- function(dataset) {
 
 
 # apply plot_connectedness to each dataset
-a11 <- plot_connectedness(return.matrix)
-a12 <- plot_connectedness(preturn.matrix)
-a13 <- plot_connectedness(nreturn.matrix)
-a14 <- plot_connectedness(volatility.matrix)
-
+a11 <- plot_connectedness(return.matrix, c(6:14), c(1:5))
+a12 <- plot_connectedness(preturn.matrix, c(6:14), c(1:5))
+a13 <- plot_connectedness(nreturn.matrix, c(6:14), c(1:5))
+a14 <- plot_connectedness(volatility.matrix, c(6:14), c(1:5))
 
 # plot the four
 plot_grid(a11, a12, a13, a14,
