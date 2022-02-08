@@ -1,13 +1,8 @@
 # read the original exchange rate data set
-library(readr)
 conven_data <- read_csv("Exp Data/v2/conv_exchange.csv", col_types = cols(Date = col_date(format = "%Y-%m-%d")))
 crypto_data <- read_csv("Exp Data/v2/crypto_exchange.csv", col_types = cols(Date = col_date(format = "%Y-%m-%d")))
 
 # visualize cryptocurrency
-library(ggplot2)
-library(ggthemes)
-library(cowplot)
-library(dplyr)
 a1 <-  ggplot() + geom_line(aes(x=crypto_data$Date, y=1/crypto_data$USDBTC)) +
     ylab('BTC') + xlab('Year')
 a2 <-  ggplot() + geom_line(aes(x=crypto_data$Date, y=1/crypto_data$USDLINK)) +
