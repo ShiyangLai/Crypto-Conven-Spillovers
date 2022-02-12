@@ -23,4 +23,4 @@ time_stamp <- seq(as.Date("2014-01-01"), as.Date("2022-01-01"), by="day")
 
 time_range <- c(1826:4748)
 
-time_length <- c(1:2094)
+time_length <- c(1:2824)

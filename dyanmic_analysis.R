@@ -5,6 +5,19 @@ big_var_est <- function(data) {
   Model1Results <- cv.BigVAR(Model)
 }
 
+cl <- makeCluster(6)
+clusterEvalQ(cl, library(BigVAR))
+clusterEvalQ(cl, library(frequencyConnectedness))
+clusterExport(cl, 'bounds')
+sp <- spilloverRollingBK12(preturn.matrix, n.ahead = 100,
+                           no.corr = F, func_est = "big_var_est",
+                           params_est = list(), window = 100,
+                           partition = bounds, cluster = cl)
+stopCluster(cl)
+plotOverall(sp)
+# check time_length
+
+
 plot_dynmaic_connectnedness <- function(data, label=FALSE) {
   cl <- makeCluster(6)
   clusterEvalQ(cl, library(BigVAR))
@@ -69,7 +82,7 @@ plot_dynmaic_connectnedness <- function(data, label=FALSE) {
     p_cry_cry_l <- append(p_cry_cry_l, sum(cry_cry) / (length(crypto) * length(crypto)))
   }
   
-  dates <- seq(as.Date("2015-1-1"), as.Date("2022-1-1"), by = "days")
+  dates <- seq(as.Date("2014-1-1"), as.Date("2022-1-1"), by = "days")
   colors <- c("Curren->Crypto" = "#213FE7", "Crypto->Curren" = "#D82121")
   
   if (label == TRUE) {
@@ -121,7 +134,7 @@ plot_dynmaic_connectnedness <- function(data, label=FALSE) {
     geom_line(aes(x=dates[time_length], y=p_trad_trad_l, color='Curren->Curren'), size=1) +
     labs(y="Connectedness", x="Time", color='') +
     scale_color_manual(values = colors) + theme_cowplot() +
-    theme(legend.position = 'bottom',
+    theme(legend.position = 'none',
           text=element_text(family="Times New Roman"))
   
   return(list("crossshort"=a1, "crossmedium"=a2, "crosslong"=a3,
@@ -142,12 +155,15 @@ plot_grid(return_connectedness$crossshort, preturn_connectedness$crossshort,
           nreturn_connectedness$crosslong, volatility_connectedness$crosslong,
           align = 'v', cols = 4)
 
-# plot_grid(nreturn_connectedness$short, volatility_connectedness$short,
-#           nreturn_connectedness$medium, volatility_connectedness$medium,
-#          nreturn_connectedness$long, volatility_connectedness$long,
-#          align = 'v', cols = 2)
+plot_grid(return_connectedness$withinshort, preturn_connectedness$withinshort,
+          nreturn_connectedness$withinshort, volatility_connectedness$withinshort,
+          return_connectedness$withinmedium, preturn_connectedness$withinmedium,
+          nreturn_connectedness$withinmedium, volatility_connectedness$withinmedium,
+          return_connectedness$withinlong, preturn_connectedness$withinlong,
+          nreturn_connectedness$withinlong, volatility_connectedness$withinlong,
+          align = 'v', cols = 4)
 
-
+return_connectedness$withinshort
 
 
 plot_grid(a1, a2, a3,
