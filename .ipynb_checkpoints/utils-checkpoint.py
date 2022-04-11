@@ -9,6 +9,9 @@ import numpy as np
 
 
 def read_data(folder_path='/Users/shiyang/Desktop/Projects/cryptocurrency/Exp Data/v2/', name='returns', binary=False):
+    if name not in ['exchange', 'returns', 'preturns',
+                    'nreturns', 'volatility']:
+        raise ValueError
     data = pd.read_csv(folder_path + name + '.csv', index_col=0)
     if binary:
         data = data.applymap(lambda x: 1 if x > 0 else 0)

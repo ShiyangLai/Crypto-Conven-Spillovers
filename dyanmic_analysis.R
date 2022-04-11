@@ -1,6 +1,6 @@
 # next, rolling the time window
 big_var_est <- function(data) {
-  Model <- constructModel(data, p = 4, struct = "Basic", gran = c(10, 25), RVAR=FALSE,
+  Model <- constructModel(data, p = 3, struct = "Basic", gran = c(10, 25), RVAR=FALSE,
                           h=1, cv="Rolling", MN=FALSE, verbose=FALSE, IC=TRUE)
   Model1Results <- cv.BigVAR(Model)
 }
@@ -82,66 +82,92 @@ plot_dynmaic_connectnedness <- function(data, label=FALSE) {
     p_cry_cry_l <- append(p_cry_cry_l, sum(cry_cry) / (length(crypto) * length(crypto)))
   }
   
-  dates <- seq(as.Date("2014-1-1"), as.Date("2022-1-1"), by = "days")
-  colors <- c("Curren->Crypto" = "#213FE7", "Crypto->Curren" = "#D82121")
+  dates <- seq(as.Date("2015-8-8"), as.Date("2022-1-1"), by = "days")
+  colors <- c("Curren->Crypto" = "#002f56", "Crypto->Curren" = "#990000")
   
   if (label == TRUE) {
     legend_position = "top"
   } else {legend_position = "none"}
   
   a1 <- ggplot() +
-    geom_line(aes(x=dates[time_length], y=p_cry_trad_s, color='Crypto->Curren'), size=1) +
-    geom_line(aes(x=dates[time_length], y=p_trad_cry_s, color='Curren->Crypto'), size=1) +
-    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.02)) + 
+    geom_line(aes(x=dates[time_length], y=p_cry_trad_s, color='Crypto->Curren'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_cry_s, color='Curren->Crypto'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_trad_s), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_cry_s), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.01)) +
     scale_color_manual(values = colors) + theme_cowplot() +
-    theme(legend.position = legend_position,
+    theme(legend.position = legend_position, plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
           text=element_text(family="Times New Roman"))
   
   a2 <- ggplot() +
-    geom_line(aes(x=dates[time_length], y=p_cry_trad_m, color='Crypto->Curren'), size=1) +
-    geom_line(aes(x=dates[time_length], y=p_trad_cry_m, color='Curren->Crypto'), size=1) +
-    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.02)) + 
+    geom_line(aes(x=dates[time_length], y=p_cry_trad_m, color='Crypto->Curren'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_cry_m, color='Curren->Crypto'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_trad_m), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_cry_m), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.01)) +
     scale_color_manual(values = colors) + theme_cowplot() +
-    theme(legend.position = "none",
+    theme(legend.position = "none", plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
           text=element_text(family="Times New Roman"))
   
   a3 <- ggplot() +
-    geom_line(aes(x=dates[time_length], y=p_cry_trad_l, color='Crypto->Curren'), size=1) +
-    geom_line(aes(x=dates[time_length], y=p_trad_cry_l, color='Curren->Crypto'), size=1) +
-    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.02)) + 
+    geom_line(aes(x=dates[time_length], y=p_cry_trad_l, color='Crypto->Curren'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_cry_l, color='Curren->Crypto'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_trad_l), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_cry_l), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.01)) +
     scale_color_manual(values = colors) + theme_cowplot() +
-    theme(legend.position = "none",
+    theme(legend.position = "none", plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
           text=element_text(family="Times New Roman"))
   
-  colors <- c("Curren->Curren" = "#213FE7", "Crypto->Crypto" = "#D82121")
+  colors <- c("Curren->Curren" = "#002f56", "Crypto->Crypto" = "#990000")
   
   a4 <- ggplot() +
-    geom_line(aes(x=dates[time_length], y=p_cry_cry_s, color='Crypto->Crypto'), size=1) +
-    geom_line(aes(x=dates[time_length], y=p_trad_trad_s, color='Curren->Curren'), size=1) +
-    labs(y="Connectedness", x="Time", color='') +
+    geom_line(aes(x=dates[time_length], y=p_cry_cry_s, color='Crypto->Crypto'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_trad_s, color='Curren->Curren'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_cry_s), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_trad_s), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.15)) +
     scale_color_manual(values = colors) + theme_cowplot() +
-    theme(legend.position = 'none', text=element_text(family="Times New Roman"))
+    theme(legend.position = legend_position, plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
+          text=element_text(family="Times New Roman"))
   
   a5 <- ggplot() +
-    geom_line(aes(x=dates[time_length], y=p_cry_cry_m, color='Crypto->Crypto'), size=1) +
-    geom_line(aes(x=dates[time_length], y=p_trad_trad_m, color='Curren->Curren'), size=1) +
-    labs(y="Connectedness", x="Time", color='') +
+    geom_line(aes(x=dates[time_length], y=p_cry_cry_m, color='Crypto->Crypto'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_trad_m, color='Curren->Curren'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_cry_m), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_trad_m), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.1)) +
     scale_color_manual(values = colors) + theme_cowplot() +
-    theme(legend.position = 'none', text=element_text(family="Times New Roman"))
+    theme(legend.position = 'none', plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
+          text=element_text(family="Times New Roman"))
   
   a6 <- ggplot() +
-    geom_line(aes(x=dates[time_length], y=p_cry_cry_l, color='Crypto->Crypto'), size=1) +
-    geom_line(aes(x=dates[time_length], y=p_trad_trad_l, color='Curren->Curren'), size=1) +
-    labs(y="Connectedness", x="Time", color='') +
+    geom_line(aes(x=dates[time_length], y=p_cry_cry_l, color='Crypto->Crypto'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_trad_l, color='Curren->Curren'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_cry_l), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_trad_l), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.1)) +
     scale_color_manual(values = colors) + theme_cowplot() +
-    theme(legend.position = 'none',
+    theme(legend.position = 'none', plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
           text=element_text(family="Times New Roman"))
   
   return(list("crossshort"=a1, "crossmedium"=a2, "crosslong"=a3,
               "withinshort"=a4, "withinmedium"=a5, "withinlong"=a6))
 }
 
-return_connectedness <- plot_dynmaic_connectnedness(return.matrix, label=TRUE)
+return_connectedness <- plot_dynmaic_connectnedness(return.matrix)
 preturn_connectedness <- plot_dynmaic_connectnedness(preturn.matrix)
 nreturn_connectedness <- plot_dynmaic_connectnedness(nreturn.matrix)
 volatility_connectedness <- plot_dynmaic_connectnedness(volatility.matrix)
@@ -162,8 +188,6 @@ plot_grid(return_connectedness$withinshort, preturn_connectedness$withinshort,
           return_connectedness$withinlong, preturn_connectedness$withinlong,
           nreturn_connectedness$withinlong, volatility_connectedness$withinlong,
           align = 'v', cols = 4)
-
-return_connectedness$withinshort
 
 
 plot_grid(a1, a2, a3,
