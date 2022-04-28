@@ -280,3 +280,6 @@ jarque.bera.test(volatility[time_range, ]$USDEUR)
 
 correlation <- rcorr(as.matrix(volatility[time_range,]))
 print(correlation$r, digits=3)
+
+
+adf.test((returns[time_range, ]$USDDOGE))

@@ -1,19 +1,19 @@
 # calculate the VAR-L model
 # install_github("tomaskrehlik/frequencyConnectedness", tag = "dev")
 
-returns <- read_csv("Exp Data/v2/returns.csv",
+returns <- read_csv("/Users/shiyang/Desktop/Projects/cryptocurrency/Exp Data/v2/returns.csv",
                     col_types = cols(...1 = col_date(format = "%Y-%m-%d")))
 returns <- returns[, focals]
 
-positive_returns <- read_csv("Exp Data/v2/preturns.csv",
+positive_returns <- read_csv("/Users/shiyang/Desktop/Projects/cryptocurrency/Exp Data/v2/preturns.csv",
                              col_types = cols(...1 = col_date(format = "%Y-%m-%d")))
 positive_returns <- positive_returns[, focals]
 
-negative_returns <- read_csv("Exp Data/v2/nreturns.csv",
+negative_returns <- read_csv("/Users/shiyang/Desktop/Projects/cryptocurrency/Exp Data/v2/nreturns.csv",
                              col_types = cols(...1 = col_date(format = "%Y-%m-%d")))
 negative_returns <- negative_returns[, focals]
 
-volatility <- read_csv("Exp Data/v2/volatility.csv",
+volatility <- read_csv("/Users/shiyang/Desktop/Projects/cryptocurrency/Exp Data/v2/volatility.csv",
                        col_types = cols(...1 = col_date(format = "%Y-%m-%d")))
 volatility <- volatility[, focals]
 
