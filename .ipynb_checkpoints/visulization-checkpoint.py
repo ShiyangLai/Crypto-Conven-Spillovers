@@ -33,11 +33,9 @@ def plot_roc_auc(real, p_all, p_part):
 
 def hue_regplot(data, x, y, hue, palette=None, markers=['o', 'x'], **kwargs):
     from matplotlib.cm import get_cmap
-    sns.set(font_scale=3, style='white')
     regplots = []
     
     levels = data[hue].unique()
-    print(levels)
     if palette is None:
         default_colors = ['#F3A712', '#1B263B']
         palette = {k: default_colors[i] for i, k in enumerate(levels)}
@@ -50,6 +48,7 @@ def hue_regplot(data, x, y, hue, palette=None, markers=['o', 'x'], **kwargs):
                 data=data[data[hue] == key],
                 color=palette[key],
                 marker=marker,
+                label=key,
                 **kwargs
             )
         )

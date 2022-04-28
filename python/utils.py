@@ -6,6 +6,7 @@ email: shiyanglai@uchicago.edu
 
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 
 
 def read_data(folder_path='/Users/shiyang/Desktop/Projects/cryptocurrency/Exp Data/v2/', name='returns', binary=False):
@@ -46,17 +47,19 @@ def series_to_supervised(data, n_in=1, n_out=1):
 def seq2seq_X_y(data, feature_num, i, lag, look_back, step_ahead):
     train_X = data[(i-look_back):i, :-step_ahead].reshape((look_back, lag, feature_num))
     train_y = data[(i-look_back):i, -step_ahead:]
-    test_X = data[i:(i+1), :-step_ahead].reshape((1, lag, feature_num))
-    test_y = data[i:(i+1), -step_ahead:]
-    return train_X, test_X, train_y, test_y
+    return train_X, train_y
 
 
 def simple_X_y(data, feature_num, i, look_back, step_ahead):
-    train_X = data[(i-look_back):i, :-step_ahead]
-    train_y = data[(i-look_back):i, -step_ahead:]
-    test_X = data[i:(i+1), :-step_ahead]
-    test_y = data[i:(i+1), -step_ahead:]
-    return train_X, test_X, train_y, test_y
+    scaler = MinMaxScaler()
+    scaler.fit(data[(i-look_back):i,:])
+    train = scaler.transform(data[(i-look_back):i,:])
+    test = scaler.transform(data[i:(i+1),:])
+    train_X = train[:,:-step_ahead]
+    train_y = train[:,-step_ahead:]
+    test_X = test[:,:-step_ahead]
+    test_y = test[:, -step_ahead:]
+    return train_X, test_X, train_y, test_y, scaler
 
 
 def drop_columns(dataset, ref, focal, horizion):
