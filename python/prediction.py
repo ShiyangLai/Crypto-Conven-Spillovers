@@ -4,11 +4,9 @@ author: shiyanglai
 email: shiyanglai@uchicago.edu
 """
 
-from utils import *
-from sklearn_training import *
-from torch_training import *
-import models
-import sklearn
+from python.utils import *
+from python.sklearn_training import *
+from python.torch_training import *
 from tqdm import tqdm
 
 
