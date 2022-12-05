@@ -1,0 +1,260 @@
+# read data
+preturn <- read_csv("~/Desktop/Cryptocurrency/Data/preprocessed/preturn_cleaned.csv")
+preturn.matrix <- data.matrix(preturn[,coins])
+nreturn <- read_csv("~/Desktop/Cryptocurrency/Data/preprocessed/nreturn_cleaned.csv")
+nreturn.matrix <- data.matrix(nreturn[,coins])
+volatility <- read_csv("~/Desktop/Cryptocurrency/Data/preprocessed/volatility_cleaned.csv")
+volatility.matrix <- data.matrix(volatility[,coins])
+
+# next, rolling the time window
+big_var_est <- function(data) {
+  Model <- constructModel(data, p = 1, struct = "Basic", gran = c(10, 25), RVAR=FALSE,
+                          h=1, cv="Rolling", MN=FALSE, verbose=FALSE, IC=TRUE)
+  Model1Results <- cv.BigVAR(Model)
+}
+
+cl <- makeCluster(6)
+clusterEvalQ(cl, library(BigVAR))
+clusterEvalQ(cl, library(frequencyConnectedness))
+clusterExport(cl, 'bounds')
+sp <- spilloverRollingBK12(volatility.matrix, n.ahead = 100,
+                           no.corr = F, func_est = "big_var_est",
+                           params_est = list(), window = 100,
+                           partition = bounds, cluster = cl)
+stopCluster(cl)
+plotOverall(sp)
+# check time_length
+
+
+dynmaic_connectnedness <- function(data, label=FALSE) {
+  cl <- makeCluster(6)
+  clusterEvalQ(cl, library(BigVAR))
+  clusterEvalQ(cl, library(frequencyConnectedness))
+  clusterExport(cl, 'bounds')
+  sp <- spilloverRollingBK12(data, n.ahead = 100,
+                             no.corr = F, func_est = "big_var_est",
+                             params_est = list(), window = 100,
+                             partition = bounds, cluster = cl)
+  stopCluster(cl)
+  
+  p_cry_trad_s <- vector(mode="numeric", length=0)
+  p_trad_cry_s <- vector(mode="numeric", length=0)
+  p_trad_trad_s <- vector(mode="numeric", length=0)
+  p_cry_cry_s <- vector(mode="numeric", length=0)
+  for (i in time_length) {
+    # cross market
+    cry_trad <- as.numeric(sp$list_of_tables[[i]][[1]][[1]][conven, crypto])
+    trad_cry <- as.numeric(sp$list_of_tables[[i]][[1]][[1]][crypto, conven])
+    p_cry_trad_s <- append(p_cry_trad_s, sum(cry_trad) / (length(conven) * length(crypto)))
+    p_trad_cry_s <- append(p_trad_cry_s, sum(trad_cry) / (length(conven) * length(crypto)))
+    # within market
+    trad_trad <- as.numeric(sp$list_of_tables[[i]][[1]][[1]][conven,conven])
+    cry_cry <- as.numeric(sp$list_of_tables[[i]][[1]][[1]][crypto,crypto])
+    p_trad_trad_s <- append(p_trad_trad_s, sum(trad_trad) / (length(conven) * length(conven)))
+    p_cry_cry_s <- append(p_cry_cry_s, sum(cry_cry) / (length(crypto) * length(crypto)))
+  }
+  
+  p_cry_trad_m <- vector(mode="numeric", length=0)
+  p_trad_cry_m <- vector(mode="numeric", length=0)
+  p_trad_trad_m <- vector(mode="numeric", length=0)
+  p_cry_cry_m <- vector(mode="numeric", length=0)
+  for (i in time_length) {
+    # cross market
+    cry_trad <- as.numeric(sp$list_of_tables[[i]][[1]][[2]][conven, crypto])
+    trad_cry <- as.numeric(sp$list_of_tables[[i]][[1]][[2]][crypto, conven])
+    p_cry_trad_m <- append(p_cry_trad_m, sum(cry_trad) / (length(conven) * length(crypto)))
+    p_trad_cry_m <- append(p_trad_cry_m, sum(trad_cry) / (length(conven) * length(crypto)))
+    # within market
+    trad_trad <- as.numeric(sp$list_of_tables[[i]][[1]][[2]][conven,conven])
+    cry_cry <- as.numeric(sp$list_of_tables[[i]][[1]][[2]][crypto,crypto])
+    p_trad_trad_m <- append(p_trad_trad_m, sum(trad_trad) / (length(conven) * length(conven)))
+    p_cry_cry_m <- append(p_cry_cry_m, sum(cry_cry) / (length(crypto) * length(crypto)))
+  }
+  
+  p_cry_trad_l <- vector(mode="numeric", length=0)
+  p_trad_cry_l <- vector(mode="numeric", length=0)
+  p_trad_trad_l <- vector(mode="numeric", length=0)
+  p_cry_cry_l <- vector(mode="numeric", length=0)
+  for (i in time_length) {
+    # cross market
+    cry_trad <- as.numeric(sp$list_of_tables[[i]][[1]][[3]][conven, crypto])
+    trad_cry <- as.numeric(sp$list_of_tables[[i]][[1]][[3]][crypto, conven])
+    p_cry_trad_l <- append(p_cry_trad_l, sum(cry_trad) / (length(conven) * length(crypto)))
+    p_trad_cry_l <- append(p_trad_cry_l, sum(trad_cry) / (length(conven) * length(crypto)))
+    # within market
+    trad_trad <- as.numeric(sp$list_of_tables[[i]][[1]][[3]][conven,conven])
+    cry_cry <- as.numeric(sp$list_of_tables[[i]][[1]][[3]][crypto,crypto])
+    p_trad_trad_l <- append(p_trad_trad_l, sum(trad_trad) / (length(conven) * length(conven)))
+    p_cry_cry_l <- append(p_cry_cry_l, sum(cry_cry) / (length(crypto) * length(crypto)))
+  }
+  return(list("p_cry_trad_s"=p_cry_trad_s, "p_trad_cry_s"=p_trad_cry_m, "p_cry_cry_s"=p_cry_cry_s, "p_trad_trad_s"=p_trad_trad_s,
+              "p_cry_trad_m"=p_cry_trad_m, "p_trad_cry_m"=p_trad_cry_m, "p_cry_cry_m"=p_cry_cry_m, "p_trad_trad_m"=p_trad_trad_m,
+              "p_cry_trad_l"=p_cry_trad_l, "p_trad_cry_l"=p_trad_cry_l, "p_cry_cry_l"=p_cry_cry_l, "p_trad_trad_l"=p_trad_trad_l))
+}
+
+
+plot_dynamic_connectedness <- function(p_cry_trad_s, p_trad_cry_s, p_cry_cry_s, p_trad_trad_s,
+                                       p_cry_trad_m, p_trad_cry_m, p_cry_cry_m, p_trad_trad_m,
+                                       p_cry_trad_l, p_trad_cry_l, p_cry_cry_l, p_trad_trad_l) {
+  
+  dates <- seq(as.Date("2015-9-2"), as.Date("2022-6-15"), by = "days")
+  colors <- c("Curren->Crypto" = "#002f56", "Crypto->Curren" = "#990000")
+  
+  if (label == TRUE) {
+    legend_position = "top"
+  } else {legend_position = "none"}
+  
+  a1 <- ggplot() +
+    geom_line(aes(x=dates[time_length], y=p_cry_trad_s, color='Crypto->Curren'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_cry_s, color='Curren->Crypto'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_trad_s), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_cry_s), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.004)) +
+    scale_color_manual(values = colors) + theme_cowplot() +
+    theme(legend.position = legend_position, plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
+          text=element_text(family="Times New Roman"))
+  
+  a2 <- ggplot() +
+    geom_line(aes(x=dates[time_length], y=p_cry_trad_m, color='Crypto->Curren'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_cry_m, color='Curren->Crypto'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_trad_m), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_cry_m), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.002)) +
+    scale_color_manual(values = colors) + theme_cowplot() +
+    theme(legend.position = "none", plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
+          text=element_text(family="Times New Roman"))
+  
+  a3 <- ggplot() +
+    geom_line(aes(x=dates[time_length], y=p_cry_trad_l, color='Crypto->Curren'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_cry_l, color='Curren->Crypto'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_trad_l), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_cry_l), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 8e-4)) +
+    scale_color_manual(values = colors) + theme_cowplot() +
+    theme(legend.position = "none", plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
+          text=element_text(family="Times New Roman"))
+  
+  colors <- c("Curren->Curren" = "#002f56", "Crypto->Crypto" = "#990000")
+  
+  a4 <- ggplot() +
+    geom_line(aes(x=dates[time_length], y=p_cry_cry_s, color='Crypto->Crypto'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_trad_s, color='Curren->Curren'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_cry_s), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_trad_s), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.01)) +
+    scale_color_manual(values = colors) + theme_cowplot() +
+    theme(legend.position = legend_position, plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
+          text=element_text(family="Times New Roman"))
+  
+  a5 <- ggplot() +
+    geom_line(aes(x=dates[time_length], y=p_cry_cry_m, color='Crypto->Crypto'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_trad_m, color='Curren->Curren'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_cry_m), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_trad_m), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.008)) + 
+    scale_color_manual(values = colors) + theme_cowplot() +
+    theme(legend.position = 'none', plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
+          text=element_text(family="Times New Roman"))
+  
+  a6 <- ggplot() +
+    geom_line(aes(x=dates[time_length], y=p_cry_cry_l, color='Crypto->Crypto'), size=1, alpha=0.5) +
+    geom_line(aes(x=dates[time_length], y=p_trad_trad_l, color='Curren->Curren'), size=1, alpha=0.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_cry_cry_l), method = 'loess', level=0.95,
+                formula = y ~ x, color='#990000', size=1.5) +
+    geom_smooth(aes(x=dates[time_length], y=p_trad_trad_l), method = 'loess', level=0.95,
+                formula = y ~ x, color='#002f56', size=1.5) +
+    labs(y="Connectedness", x="Time", color='') + ylim(c(0, 0.005)) + 
+    scale_color_manual(values = colors) + theme_cowplot() +
+    theme(legend.position = 'none', plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
+          text=element_text(family="Times New Roman"))
+  
+  return(list("crossshort"=a1, "crossmedium"=a2, "crosslong"=a3,
+              "withinshort"=a4, "withinmedium"=a5, "withinlong"=a6))
+}
+
+preturn_connectedness <- dynmaic_connectnedness(preturn.matrix)
+nreturn_connectedness <- dynmaic_connectnedness(nreturn.matrix)
+volatility_connectedness <- dynmaic_connectnedness(volatility.matrix)
+
+
+plot_grid(preturn_connectedness$crossshort,
+          nreturn_connectedness$crossshort, volatility_connectedness$crossshort,
+          preturn_connectedness$crossmedium,
+          nreturn_connectedness$crossmedium, volatility_connectedness$crossmedium,
+          preturn_connectedness$crosslong,
+          nreturn_connectedness$crosslong, volatility_connectedness$crosslong,
+          align = 'v', cols = 3)
+
+plot_grid(preturn_connectedness$withinshort,
+          nreturn_connectedness$withinshort, volatility_connectedness$withinshort,
+          preturn_connectedness$withinmedium,
+          nreturn_connectedness$withinmedium, volatility_connectedness$withinmedium,
+          preturn_connectedness$withinlong,
+          nreturn_connectedness$withinlong, volatility_connectedness$withinlong,
+          align = 'v', cols = 3)
+
+# get spillover
+cl <- makeCluster(6)
+clusterEvalQ(cl, library(BigVAR))
+clusterEvalQ(cl, library(frequencyConnectedness))
+sp <- spilloverRollingDY12(data=volatility.matrix, func_est='big_var_est', params_est=list(),
+                           window=100, no.corr=F, cluster = cl)
+stopCluster(cl)
+p_cry_trad <- vector(mode="numeric", length=0)
+p_trad_cry <- vector(mode="numeric", length=0)
+for (i in time_length) {
+  cry_trad <- as.numeric(sp$list_of_tables[[i]][[1]][[1]][conven, crypto])
+  trad_cry <- as.numeric(sp$list_of_tables[[i]][[1]][[1]][crypto, conven])
+  p_cry_trad <- append(p_cry_trad, sum(cry_trad) / (length(conven) * length(crypto)))
+  p_trad_cry <- append(p_trad_cry, sum(trad_cry) / (length(conven) * length(crypto)))
+}
+dates <- seq(as.Date("2015-8-8"), as.Date("2022-1-1"), by = "days")
+colors <- c("Curren->Crypto" = "#002f56", "Crypto->Curren" = "#990000")
+curve_frame <- data.frame(x=c(as.Date('2020-03-01')),
+                          y=c(0.018),
+                          xend=c(as.Date('2019-12-01')),
+                          yend=c(0.019))
+
+ggplot() +
+  geom_rect(aes(xmin=as.Date('2020-01-21'),xmax=as.Date('2022-01-01'),ymin=0,ymax=Inf), fill="#FF6363", alpha=0.3) +
+  geom_rect(aes(xmin=as.Date('2015-11-15'),xmax=as.Date('2018-03-07'),ymin=0,ymax=Inf), fill="#417D7A", alpha=0.3) +
+  geom_rect(aes(xmin=as.Date('2020-10-28'),xmax=as.Date('2022-01-01'),ymin=0,ymax=Inf), fill="#417D7A", alpha=0.3) +
+  geom_point(aes(x=dates[time_length], y=p_cry_trad, color='Crypto->Curren'), size=1, alpha=0.2) +
+  geom_point(aes(x=dates[time_length], y=p_trad_cry, color='Curren->Crypto'), size=1, alpha=0.2) +
+  # geom_smooth(aes(x=dates[time_length], y=p_cry_trad), method = 'loess', level=0.99,
+  #             formula = y ~ x, color='#990000', size=1, span=0.4) +
+  # geom_smooth(aes(x=dates[time_length], y=p_trad_cry), method = 'loess', level=0.99,
+  #             formula = y ~ x, color='#002f56', size=1, span=0.4) +
+  labs(y="Connectedness", x="Time", color='') +
+  scale_color_manual(values = colors) + theme_cowplot() +
+  theme(legend.position = 'none', plot.margin = margin(0.5,0.5,0.5,0.5, "cm"), 
+        text=element_text(family="Times New Roman", size=10),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10)) +
+  geom_curve(
+    aes(x = x, y = y, xend = xend, yend = yend),
+    data = curve_frame,
+    curvature = -0.4,
+    angle = 90
+  ) + geom_point(
+    aes(x=xend, y=yend), 
+    data = curve_frame,
+    color = "black"
+  ) + geom_text(
+    aes(x, y, label = labels), color='black',
+    data = data.frame(x=as.Date('2019-12-01'), y=0.019, labels='COVID-19'),
+    hjust = 1.2,
+    family = "Times New Roman",
+    size = 3.3,
+  ) + ylim(c(0, 0.02))
+

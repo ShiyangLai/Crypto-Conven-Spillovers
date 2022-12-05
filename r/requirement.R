@@ -16,17 +16,13 @@ library(rtadfr)
 library(Hmisc)
 library(igraph)
 library(influenceR)
+library(svglite)
 
-focals <- c("USDBTC", "USDDOGE", "USDLTC", "USDXRP", "USDETH",  
-            "USDEUR", "USDJPY", "USDGBP", "USDAUD", "USDCAD",
-            "USDCHF", "USDCNY", "USDSEK", "USDNZD")   # nine conventional currency
 
-conven <- c(6: 14)
-
-crypto <- c(1: 5)
-
-time_stamp <- seq(as.Date("2015-08-08"), as.Date("2022-01-01"), by="day")
+time_stamp <- seq(as.Date("2015-09-01"), as.Date("2022-06-01"), by="day")
 
 time_range <- c(2410:4748)
 
 time_length <- c(1: (length(time_stamp)-99))
+
+

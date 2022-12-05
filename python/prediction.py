@@ -1,16 +1,10 @@
-"""
-prediction tasks and models for MACSS 30100
-author: shiyanglai
-email: shiyanglai@uchicago.edu
-"""
-
-from python.utils import *
-from python.sklearn_training import *
-from python.torch_training import *
+from utils import *
+from sklearn_training import *
+from torch_training import *
 from tqdm import tqdm
 
 
-def regression_task(dataset, focal, in_system, model, horizion=1, step_ahead=1, lookback=730, lag=7, **kwargs):
+def regression_task(dataset, focal, in_system, model1, model2=None, horizion=1, step_ahead=1, lookback=730, lag=7, **kwargs):
     # get the focal currency for later usage
     focal_currency = dataset['USD'+focal].values
     # for comparasion purpose, I do the training on the whole dataset and the in_system dataset
@@ -34,13 +28,16 @@ def regression_task(dataset, focal, in_system, model, horizion=1, step_ahead=1, 
         
     # using rolling window strategy to test the performance of the model
     full_loss, part_loss = [], []
-    for i in tqdm(range(lookback, whole_dataset.shape[0]-step_ahead, jump)):
-        if 'tsai' in str(type(model)):
-            _all = train_torch(whole_dataset, feature_num_full, i, lag, lookback, horizion, model, step_ahead)
-            _part = train_torch(in_sys_dataset, feature_num_part, i, lag, lookback, horizion, model, step_ahead)
+    for i in range(lookback, whole_dataset.shape[0]-step_ahead, jump):
+        if 'tsai' in str(type(model1)):
+            _all = train_torch(whole_dataset, feature_num_full, i, lag, lookback, horizion, model1, step_ahead)
+            if model2:
+                _part = train_torch(in_sys_dataset, feature_num_part, i, lag, lookback, horizion, model2, step_ahead)
+            else:
+                _part = train_torch(in_sys_dataset, feature_num_part, i, lag, lookback, horizion, model1, step_ahead)
         else:
-            predicted_all, real = train_sklearn(whole_dataset, feature_num_full, i, lag, lookback, horizion, model, step_ahead)
-            predicted_part, _ = train_sklearn(in_sys_dataset, feature_num_part, i, lag, lookback, horizion, model, step_ahead)
+            predicted_all, real = train_sklearn(whole_dataset, feature_num_full, i, lag, lookback, horizion, model1, step_ahead)
+            predicted_part, _ = train_sklearn(in_sys_dataset, feature_num_part, i, lag, lookback, horizion, model1, step_ahead)
             _all, _part = dynamic_evaluation(real, predicted_all, predicted_part, metrics.mean_absolute_error)
         full_loss.append(_all)
         part_loss.append(_part)

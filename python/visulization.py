@@ -1,9 +1,3 @@
-"""
-for visualization purpose
-author: shiyanglai
-email: shiyanglai@uchicago.edu
-"""
-
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc, roc_auc_score
 import seaborn as sns

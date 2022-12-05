@@ -1,4 +1,4 @@
-from python.utils import *
+from utils import *
 import numpy as np
 
 
