@@ -27,34 +27,36 @@ for (i in c(1:length(ends(g, es=E(g), names=T)[,1]))) {
 }
 E(g)$edge.color <- color_map
 
-# determine the color of nodes. The opacity reflects the within-market pagerank
+# determine the color of nodes. The opacity reflects the within-market in-degree
 # V(g)$color <- ifelse(is.element(V(g)$name, focals[crypto]), 'darkred', 'darkblue')
 g_c.in <- g
 g_c.in <- delete.edges(g_c.in, which(E(g_c.in)$edge.color=='#6C3483'))
-pagerank <- (page_rank(g_c.in)$vector-min(page_rank(g_c.in)$vector)+0.05)/(max(page_rank(g_c.in)$vector)-min(page_rank(g_c.in)$vector)+0.05)
+in_degree <- strength(g_c.in, mode='out')
+indeg <- (in_degree-min(in_degree))/(max(in_degree)-min(in_degree)) + 0.3
 color_map <- vector(mode='numeric')
 for (i in focals) {
   if (is.element(i, focals[crypto])) {
-    color_map[i] <- adjustcolor('darkred', alpha.f=pagerank[i])
+    color_map[i] <- adjustcolor('darkred', alpha.f=indeg[i])
   } else {
-    color_map[i] <- adjustcolor('darkblue', alpha.f=pagerank[i])
+    color_map[i] <- adjustcolor('darkblue', alpha.f=indeg[i])
   }
   
 }
 V(g)$color <- color_map
 
-# determine the size of nodes. The size reflects cross-market pagerank 
+# determine the size of nodes. The size reflects cross-market in-degree 
 g_c.out <- g
 g_c.out <- delete.edges(g_c.out, which(E(g_c.out)$edge.color=='#1C2833'))
-V(g)$size <- page_rank(g_c.out)$vector*230
+V(g)$size <- log(strength(g_c.out, mode='out') + 1) * 100
 
 # draw the plot
 g %>% add_layout_(in_circle()) %>%
   plot(edge.arrow.size=0.2, vertex.color=V(g)$color,
-     edge.color = adjustcolor(E(g)$edge.color, .5), vertex.label = V(g)$name,
-     vertex.label.color='black', vertex.label.cex=1.1, 
-     edge.curved=0.2, shape='circle', vertex.arrow.size=30, vertex.size=V(g)$size,
-     vertex.label.dist=3.5, vertex.label.degree = -pi/2)
+       edge.color = adjustcolor(E(g)$edge.color, .5), vertex.label = V(g)$name,
+       vertex.label.color='black', vertex.label.cex=1.2, vertex.frame.color=NA,
+       edge.curved=0.2, shape='circle', vertex.arrow.size=30, vertex.size=V(g)$size,
+       vertex.label.dist=3.5 * (V(g)$size - min(V(g)$size)) / (max(V(g)$size) - min(V(g)$size)),
+       vertex.label.degree = -pi/2)
 title("Connectedness within 100 days",cex.main=1.7,family="Times", line = -34.2)
 
 

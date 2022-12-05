@@ -1,6 +1,6 @@
 from tsai.all import *
 from IPython.display import clear_output
-from python.utils import *
+from utils import *
 
 def train_torch(dataset, feature_num, i, lag, lookback, horizion, model, step_ahead):
     X, y = seq2seq_X_y(dataset, feature_num, i, lag, lookback, horizion)
